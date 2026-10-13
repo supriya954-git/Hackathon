@@ -51,10 +51,10 @@ const MORE_LINKS: { to: string; key: TKey }[] = [
 export function Logo() {
   return (
     <Link to="/" className="flex items-center gap-2 font-bold tracking-tight">
-      <span className="flex size-8 items-center justify-center rounded-lg bg-navy text-teal">
+    <span className="flex size-9 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-sm">
         <Droplets className="size-5" />
       </span>
-      <span className="text-lg">JalRakshak</span>
+      <span className="text-base font-extrabold sm:text-lg">JalRakshak</span>
     </Link>
   );
 }
@@ -67,6 +67,7 @@ function LangToggle() {
       size="sm"
       onClick={() => setLang(lang === "en" ? "ne" : "en")}
       aria-label="Switch language / भाषा बदल्नुहोस्"
+      className="text-muted-foreground hover:text-foreground"
     >
       <Languages /> {lang === "en" ? "नेपाली" : "English"}
     </Button>
@@ -119,7 +120,7 @@ function AccountMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" aria-label="Account menu">
+        <Button variant="outline" size="sm" aria-label="Account menu" className="border-border/80 bg-card">
           <User /> <span className="hidden xl:inline">{ROLE_LABEL[role]}</span>
         </Button>
       </DropdownMenuTrigger>
@@ -246,13 +247,13 @@ export function SiteHeader() {
   const { can } = useAuth();
   const [open, setOpen] = useState(false);
   const linkCls =
-    "rounded-md px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground";
-  const active = { className: "bg-muted text-foreground" };
+    "min-h-10 rounded-md px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground";
+  const active = { className: "bg-accent text-accent-foreground" };
   return (
-    <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6">
+    <header className="sticky top-0 z-40 border-b-2 border-primary/15 bg-card/95 shadow-sm backdrop-blur">
+      <div className="mx-auto flex h-[4.25rem] max-w-7xl items-center gap-2 px-3 sm:gap-3 sm:px-6">
         <Logo />
-        <nav aria-label="Main" className="ml-4 hidden items-center gap-0.5 lg:flex">
+        <nav aria-label="Main" className="ml-2 hidden items-center gap-0.5 xl:ml-4 lg:flex">
           {PRIMARY_NAV.map((n) => (
             <Link
               key={n.to}
@@ -273,7 +274,7 @@ export function SiteHeader() {
           )}
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <div className="hidden items-center gap-2 lg:flex">
+          <div className="hidden items-center gap-1 lg:flex xl:gap-2">
             <LangToggle />
             <ThemeToggle />
             <Notifications />
@@ -281,7 +282,8 @@ export function SiteHeader() {
           </div>
           <Button variant="sos" size="sm" asChild>
             <Link to="/request-help">
-              <Phone /> <span className="hidden sm:inline">{t("nav.sosLong")}</span>
+              <Phone /> <span className="hidden 2xl:inline">{t("nav.sosLong")}</span>
+              <span className="hidden sm:inline 2xl:hidden">{t("nav.sos")}</span>
               <span className="sm:hidden">{t("nav.sos")}</span>
             </Link>
           </Button>

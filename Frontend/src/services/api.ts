@@ -114,6 +114,48 @@ export interface DashboardSummary {
   recoveryAwaitingReview: number;
 }
 
+export type RoadStatus = "open" | "partially_open" | "closed" | "unknown";
+
+export interface RoadConditionIncident {
+  id: string;
+  road: string;
+  district?: string;
+  location?: string;
+  status: RoadStatus;
+  raw_status?: string;
+  reason?: string;
+  source: string;
+  source_url?: string;
+  notice_url?: string;
+  last_updated: string;
+  latitude?: number;
+  longitude?: number;
+  is_live?: boolean;
+  is_stale?: boolean;
+}
+
+export interface RoadConditionsResponse {
+  items: RoadConditionIncident[];
+  source: string;
+  notice_url?: string;
+  last_updated: string;
+  is_live?: boolean;
+  is_stale?: boolean;
+  note?: string;
+}
+
+export interface RoadStatusSummary {
+  total: number;
+  open: number;
+  partially_open: number;
+  closed: number;
+  unknown: number;
+  source: string;
+  last_updated: string;
+  is_live?: boolean;
+  is_stale?: boolean;
+}
+
 export interface ApiService {
   login(email: string, password: string): Promise<{ user: User; accessToken: string }>;
   register(
@@ -126,7 +168,7 @@ export interface ApiService {
   getDashboard(): Promise<DashboardSummary>;
   getReports(): Promise<HazardReport[]>;
   createReport(r: NewReport): Promise<HazardReport>;
-  verifyReport(id: string, status: ReportStatus, actor: string): Promise<HazardReport>;
+  verifyReport(id: string, status: "verified" | "rejected", actor: string): Promise<HazardReport>;
   getRescueRequests(): Promise<RescueRequest[]>;
   getRescueByReference(ref: string): Promise<RescueRequest | null>;
   createRescueRequest(r: NewRescue): Promise<RescueRequest>;
@@ -169,6 +211,8 @@ export interface ApiService {
     actor: string,
   ): Promise<RecoveryApplication>;
   getActivity(): Promise<ActivityEntry[]>;
+  getRoadConditions(): Promise<RoadConditionsResponse>;
+  getRoadConditionsSummary(): Promise<RoadStatusSummary>;
   getWeather(latitude: number, longitude: number): Promise<WeatherData>;
   getNotifications(): Promise<Notification[]>;
   markNotificationRead(id: string): Promise<Notification>;
@@ -264,6 +308,8 @@ const httpApi: ApiService = {
       ...body({ status, note }),
     }),
   getActivity: () => http("/api/admin/activity"),
+  getRoadConditions: () => http("/api/roads"),
+  getRoadConditionsSummary: () => http("/api/roads/summary"),
   getWeather: (latitude, longitude) => http(`/api/weather?lat=${latitude}&lon=${longitude}`),
   getNotifications: () => cachedGet("notifications", "/api/notifications"),
   markNotificationRead: (id) =>
@@ -317,10 +363,25 @@ function patch<T extends { id: string; updatedAt: string }>(
 }
 
 const mockApi: ApiService = {
-  login: async (email) => ({
-    user: { id: "demo-citizen", name: "Demo citizen", email, role: "citizen" },
-    accessToken: "demo-token",
-  }),
+  login: async (email, password) => {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (normalizedEmail === "admin@jalrakshak.local") {
+      if (password !== "change-this-password") throw new Error("Invalid email or password");
+      return {
+        user: {
+          id: "demo-admin",
+          name: "Demo Administrator",
+          email: normalizedEmail,
+          role: "admin",
+        },
+        accessToken: "demo-admin-token",
+      };
+    }
+    return {
+      user: { id: "demo-citizen", name: "Demo citizen", email: normalizedEmail, role: "citizen" },
+      accessToken: "demo-token",
+    };
+  },
   register: async (name, email) => ({
     user: { id: "demo-citizen", name, email, role: "citizen" },
     accessToken: "demo-token",
@@ -552,6 +613,114 @@ const mockApi: ApiService = {
     return delay(r);
   },
   getActivity: () => delay(load().activity),
+  getRoadConditions: async () =>
+    delay({
+      items: [
+        {
+          id: "nh03-kaligandaki-washout",
+          road: "NH03 / Pushpalal Mid Hill Highway",
+          district: "Gandaki / Nuwakot / Baglung corridor",
+          location: "Kaligandaki River corridor",
+          status: "closed",
+          raw_status: "Closed",
+          reason: "Highway washout by the Kaligandaki River",
+          source: "Department of Roads (official dashboard)",
+          source_url: "https://navigate.dor.gov.np/dashboard",
+          notice_url: "https://dor.gov.np/home/page/highway-traffic-updates",
+          last_updated: "2026-09-27T02:12:00+05:45",
+          latitude: 28.2514,
+          longitude: 84.8722,
+          is_live: false,
+          is_stale: true,
+        },
+        {
+          id: "nh37-kanti-rajpath",
+          road: "NH37 / Kanti Rajpath",
+          district: "Makwanpur",
+          location: "Hetauda–Bagmati–Tikabhairav corridor",
+          status: "closed",
+          raw_status: "Closed",
+          reason: "Landslide and road obstruction",
+          source: "Department of Roads (official dashboard)",
+          source_url: "https://navigate.dor.gov.np/dashboard",
+          notice_url: "https://dor.gov.np/home/page/highway-traffic-updates",
+          last_updated: "2026-09-27T04:00:00+05:45",
+          latitude: 27.4179,
+          longitude: 85.0364,
+          is_live: false,
+          is_stale: true,
+        },
+        {
+          id: "nh58-karnali-rajmarg",
+          road: "NH58 / Karnali Rajmarg",
+          district: "Banke / Surkhet",
+          location: "Jamunaha–Nepalgunj–Kohalpur corridor",
+          status: "partially_open",
+          raw_status: "Partially Opened",
+          reason: "Restricted access with intermittent movement",
+          source: "Department of Roads (official dashboard)",
+          source_url: "https://navigate.dor.gov.np/dashboard",
+          notice_url: "https://dor.gov.np/home/page/highway-traffic-updates",
+          last_updated: "2026-09-28T09:15:00+05:45",
+          latitude: 28.0681,
+          longitude: 81.7519,
+          is_live: false,
+          is_stale: true,
+        },
+        {
+          id: "nh17-prithvi-rajmarg",
+          road: "NH17 / Prithvi Rajmarg",
+          district: "Nuwakot / Tanahun",
+          location: "Naubise–Mugling–Pokhara section",
+          status: "open",
+          raw_status: "Opened",
+          reason: "Public access reopened after earlier disruption",
+          source: "Department of Roads (official dashboard)",
+          source_url: "https://navigate.dor.gov.np/dashboard",
+          notice_url: "https://dor.gov.np/home/page/highway-traffic-updates",
+          last_updated: "2026-09-28T10:45:00+05:45",
+          latitude: 27.8897,
+          longitude: 84.5474,
+          is_live: false,
+          is_stale: true,
+        },
+        {
+          id: "nh05-east-west-unknown",
+          road: "NH05 / East-West Highway section",
+          district: "Nawalpur / Bardiya corridor",
+          location: "Multiple highway segments",
+          status: "unknown",
+          raw_status: "Status not confirmed",
+          reason: "Official notice does not clearly confirm a reliable current status",
+          source: "Department of Roads (official dashboard)",
+          source_url: "https://navigate.dor.gov.np/dashboard",
+          notice_url: "https://dor.gov.np/home/page/highway-traffic-updates",
+          last_updated: "2026-09-28T12:00:00+05:45",
+          latitude: 27.95,
+          longitude: 83.9,
+          is_live: false,
+          is_stale: true,
+        },
+      ],
+      source: "Department of Roads (official dashboard) — manually reviewed fallback snapshot",
+      notice_url: "https://dor.gov.np/home/page/highway-traffic-updates",
+      last_updated: "2026-09-28T12:00:00+05:45",
+      is_live: false,
+      is_stale: true,
+      note: "No documented public API was identified for the Department of Roads traffic pages. This is a reviewed official-dashboard snapshot and should not be treated as automatic live synchronization.",
+    }),
+  getRoadConditionsSummary: async () =>
+    delay({
+      total: 5,
+      open: 1,
+      partially_open: 1,
+      closed: 2,
+      unknown: 1,
+      source: "Department of Roads (official dashboard)",
+      last_updated: "2026-09-28T12:00:00+05:45",
+      is_live: false,
+      is_stale: true,
+    }),
 };
 
 export const api: ApiService = IS_MOCK ? mockApi : httpApi;

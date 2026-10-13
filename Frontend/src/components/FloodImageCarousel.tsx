@@ -54,7 +54,7 @@ export function FloodImageCarousel({ children }: { children?: ReactNode }) {
   return (
     <section
       aria-label={t("carousel.label")}
-      className="relative overflow-hidden rounded-none border-0 bg-card shadow-sm sm:rounded-xl sm:border"
+      className="relative overflow-hidden rounded-lg border border-border/70 bg-navy shadow-md"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -62,7 +62,7 @@ export function FloodImageCarousel({ children }: { children?: ReactNode }) {
         if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false);
       }}
     >
-      <div className="relative min-h-[34rem] sm:aspect-[16/8] sm:min-h-[30rem] lg:min-h-[34rem]">
+      <div className="relative min-h-[31rem] sm:aspect-[16/7] sm:min-h-[31rem] lg:min-h-[34rem]">
         {IMAGES.map((image, index) => (
           <img
             key={image.src}
@@ -75,7 +75,7 @@ export function FloodImageCarousel({ children }: { children?: ReactNode }) {
         ))}
         <div className="absolute inset-0 bg-gradient-to-r from-[#102d36]/95 via-[#102d36]/75 to-[#102d36]/20" />
         {children && <div className="absolute inset-0 z-10 flex items-center">{children}</div>}
-        <div className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-3 bg-gradient-to-t from-black/70 to-transparent px-4 pb-4 pt-16">
+        <div className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-3 bg-gradient-to-t from-black/75 via-black/25 to-transparent px-4 pb-4 pt-16 sm:px-6">
           <p className="text-sm font-medium text-white">{t("carousel.caption")}</p>
           <span className="shrink-0 text-xs text-white/90">
             {current + 1} / {IMAGES.length}
@@ -85,7 +85,7 @@ export function FloodImageCarousel({ children }: { children?: ReactNode }) {
           type="button"
           onClick={previous}
           aria-label={t("carousel.previous")}
-          className="absolute left-3 top-1/2 z-20 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white transition hover:bg-black/65 focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute left-3 top-1/2 z-20 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-navy/75 text-white shadow-md transition-colors hover:bg-navy focus:outline-none focus:ring-2 focus:ring-white sm:left-5"
         >
           <ChevronLeft className="size-5" />
         </button>
@@ -93,13 +93,13 @@ export function FloodImageCarousel({ children }: { children?: ReactNode }) {
           type="button"
           onClick={next}
           aria-label={t("carousel.next")}
-          className="absolute right-3 top-1/2 z-20 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white transition hover:bg-black/65 focus:outline-none focus:ring-2 focus:ring-white"
+          className="absolute right-3 top-1/2 z-20 flex size-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-navy/75 text-white shadow-md transition-colors hover:bg-navy focus:outline-none focus:ring-2 focus:ring-white sm:right-5"
         >
           <ChevronRight className="size-5" />
         </button>
       </div>
       <div
-        className="flex items-center justify-center gap-2 px-4 py-3"
+        className="flex min-h-11 items-center justify-center gap-1.5 border-t border-border/70 bg-card px-4 py-2"
         role="tablist"
         aria-label={t("carousel.selectSlide")}
       >
@@ -111,8 +111,10 @@ export function FloodImageCarousel({ children }: { children?: ReactNode }) {
             aria-selected={index === current}
             aria-label={`${t("carousel.slide")} ${index + 1}`}
             onClick={() => goTo(index)}
-            className={`size-2.5 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${index === current ? "bg-teal" : "bg-muted-foreground/40 hover:bg-muted-foreground/70"}`}
-          />
+            className="flex size-8 items-center justify-center rounded-full transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          >
+            <span className={`size-2.5 rounded-full transition-colors ${index === current ? "bg-primary" : "bg-muted-foreground/40 group-hover:bg-muted-foreground/70"}`} />
+          </button>
         ))}
       </div>
     </section>

@@ -154,7 +154,7 @@ function WeatherPanel({
             </p>
           </div>
         </div>
-        <div className="rounded-lg border bg-accent/30 p-4">
+            <div className="rounded-lg border border-primary/20 bg-accent/45 p-4">
           <p className="flex items-center gap-2 font-semibold">
             <AlertTriangle className="size-4" />
             Weather advisory
@@ -174,7 +174,7 @@ function WeatherPanel({
           {data.hourly.map((hour) => {
             const Icon = weatherIcon(hour.weather_code);
             return (
-              <div key={hour.time} className="min-w-24 rounded-lg border p-2 text-center text-xs">
+              <div key={hour.time} className="min-w-24 rounded-md border border-border/80 bg-card p-2 text-center text-xs shadow-sm">
                 <p className="text-muted-foreground">
                   {localTime(hour.time).split(", ")[1] ?? localTime(hour.time)}
                 </p>
@@ -197,7 +197,7 @@ function WeatherPanel({
           {data.forecast.map((day) => {
             const Icon = weatherIcon(day.weather_code);
             return (
-              <div key={day.date} className="rounded-lg border p-3 text-center text-sm">
+              <div key={day.date} className="rounded-md border border-border/80 bg-card p-3 text-center text-sm shadow-sm">
                 <p className="font-medium">{day.date}</p>
                 <Icon className="mx-auto my-2 size-5 text-teal" />
                 <p className="font-semibold">
@@ -275,7 +275,7 @@ function Dashboard() {
         eyebrow={<DemoBadge />}
       />
       <main className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6">
-        <div className="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4">
+        <div className="card-surface flex flex-wrap items-end gap-3 p-4">
           <label className="grid gap-1 text-sm font-medium">
             {t("filter.district")}
             <select
@@ -388,7 +388,7 @@ function Dashboard() {
               <div className="h-32 animate-pulse rounded-lg bg-muted md:col-span-2" />
             </div>
           ) : weather.isError || weather.data?.status === "unavailable" ? (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warning/35 bg-warning/10 p-4 text-sm">
               <p>{weather.data?.message ?? "Live weather could not be retrieved."}</p>
               <Button variant="outline" onClick={() => void weather.refetch()}>
                 {t("common.retry")}
@@ -473,7 +473,7 @@ function Dashboard() {
             <Section title={t("home.latestAlerts")}>
               <div className="grid gap-3 md:grid-cols-2">
                 {filteredAlerts.map((alert) => (
-                  <article key={alert.id} className="rounded-lg border p-4">
+                  <article key={alert.id} className="rounded-lg border border-border/80 bg-card p-4 shadow-sm">
                     <div className="flex justify-between gap-3">
                       <h3 className="font-semibold">{alert.title}</h3>
                       <StatusBadge status={alert.verified ? "verified" : "unverified"} />
@@ -503,7 +503,7 @@ function Metric({
 }) {
   return (
     <div className="card-surface flex items-center gap-4 p-5">
-      <span className="rounded-lg bg-accent p-3 text-teal">
+      <span className="flex size-11 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground">
         <Icon className="size-5" />
       </span>
       <div>

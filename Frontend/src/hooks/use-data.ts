@@ -14,6 +14,7 @@ export const qk = {
   recovery: ["recovery"],
   activity: ["activity"],
   weather: ["weather"],
+  roads: ["roads"],
   notifications: ["notifications"],
 } as const;
 
@@ -43,6 +44,13 @@ export const useWeather = (latitude = 27.7172, longitude = 85.324) =>
     queryFn: () => api.getWeather(latitude, longitude),
     ...opts,
     refetchInterval: 600_000,
+  });
+export const useRoadConditions = () =>
+  useQuery({
+    queryKey: qk.roads,
+    queryFn: api.getRoadConditions,
+    ...opts,
+    refetchInterval: 300_000,
   });
 export const useNotifications = (enabled = true) =>
   useQuery({

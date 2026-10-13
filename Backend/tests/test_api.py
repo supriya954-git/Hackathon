@@ -90,6 +90,55 @@ def test_admin_protection(client):
     response=client.patch("/api/admin/reports/not-found/verify", json={"status":"verified"})
     assert response.status_code == 401
 
+def test_hazard_reports_require_explicit_admin_approval(client):
+    created = client.post(
+        "/api/reports",
+        json={
+            "hazard": "flood",
+            "district": "Kaski",
+            "municipality": "Pokhara",
+            "description": "Water rising near homes",
+            "status": "verified",
+            "source": "official",
+        },
+    )
+    assert created.status_code == 201
+    assert created.json["status"] == "unverified"
+    assert created.json["source"] == "community"
+
+    citizen = client.post(
+        "/api/auth/register",
+        json={"name": "Citizen", "email": "approval-citizen@example.com", "password": "strong-pass"},
+    )
+    citizen_headers = {"Authorization": f"Bearer {citizen.json['accessToken']}"}
+    assert client.patch(
+        f"/api/admin/reports/{created.json['id']}/verify",
+        headers=citizen_headers,
+        json={"status": "verified"},
+    ).status_code == 403
+
+    with client.application.app_context():
+        from app.extensions import db
+        from app.models import User
+
+        admin = User(name="Test Admin", email="test-admin@example.com", role="admin")
+        admin.set_password("strong-pass")
+        db.session.add(admin)
+        db.session.commit()
+
+    admin_login = client.post(
+        "/api/auth/login",
+        json={"email": "test-admin@example.com", "password": "strong-pass"},
+    )
+    admin_headers = {"Authorization": f"Bearer {admin_login.json['accessToken']}"}
+    report_url = f"/api/admin/reports/{created.json['id']}/verify"
+    invalid = client.patch(report_url, headers=admin_headers, json={"status": "approved"})
+    assert invalid.status_code == 400
+
+    approved = client.patch(report_url, headers=admin_headers, json={"status": "verified"})
+    assert approved.status_code == 200
+    assert approved.json["status"] == "verified"
+
 def test_notifications_require_authentication(client):
     assert client.get("/api/notifications").status_code == 401
     assert client.patch("/api/notifications/not-found/read").status_code == 401
@@ -131,3 +180,18 @@ def test_weather_normalizes_provider_response(client, monkeypatch):
     assert response.status_code == 200
     assert response.json["source"] == "Open-Meteo"
     assert response.json["status"] == "live"
+
+
+def test_road_conditions_returns_summary_and_filtered_items(client):
+    response = client.get("/api/roads")
+    assert response.status_code == 200
+    payload = response.json
+    assert isinstance(payload["items"], list)
+    assert payload["items"]
+    assert payload["source"].startswith("Department of Roads")
+
+    summary = client.get("/api/roads/summary")
+    assert summary.status_code == 200
+    summary_json = summary.json
+    assert summary_json["total"] >= 1
+    assert set(summary_json.keys()) >= {"total", "open", "partially_open", "closed", "unknown", "last_updated", "source"}

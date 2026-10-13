@@ -7,6 +7,7 @@ from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity, j
 from sqlalchemy import desc
 from ..extensions import db
 from ..models import *
+from ..services.road_conditions_service import get_road_conditions, summarize_road_conditions
 from ..services.weather_service import WeatherProviderError, get_weather
 
 api = Blueprint("api", __name__, url_prefix="/api")
@@ -127,7 +128,11 @@ def create_report():
 @api.patch("/admin/reports/<id>/verify")
 @admin_required
 def verify_report(id):
-    r=HazardReport.query.get_or_404(id); d=request.get_json(silent=True) or {}; r.status=d.get("status",r.status); notify(r.reporter_id, "Report status updated", f"Your hazard report is now {r.status}.", "report"); audit(f"Set report status: {r.status}",id); db.session.commit(); return payload(r)
+    d=request.get_json(silent=True) or {}
+    status=d.get("status")
+    if status not in ("verified", "rejected"):
+        return fail("Status must be verified or rejected")
+    r=HazardReport.query.get_or_404(id); r.status=status; notify(r.reporter_id, "Report status updated", f"Your hazard report is now {r.status}.", "report"); audit(f"Set report status: {r.status}",id); db.session.commit(); return payload(r)
 
 def rescue_ref(): return f"JR-RQ-{__import__('secrets').token_hex(3).upper()}"
 @api.get("/rescue-requests")
@@ -276,6 +281,16 @@ def dashboard():
         "unfulfilledReliefRequests": ReliefRequest.query.filter(ReliefRequest.status.notin_(["delivered", "cancelled"])).count(),
         "recoveryAwaitingReview": RecoveryApplication.query.filter(RecoveryApplication.status.in_(["submitted", "under_review"])).count(),
     })
+
+@api.get("/roads")
+def roads():
+    payload = get_road_conditions()
+    return jsonify(payload)
+
+@api.get("/roads/summary")
+def roads_summary():
+    payload = get_road_conditions()
+    return jsonify(summarize_road_conditions(payload.get("items", [])))
 
 @api.get("/weather")
 def weather():

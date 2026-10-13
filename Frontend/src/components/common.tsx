@@ -90,14 +90,14 @@ export function Freshness({ at, staleHours = 12 }: { at: string; staleHours?: nu
 
 export function PageHeader({ title, description, actions, eyebrow }: { title: string; description?: string; actions?: ReactNode; eyebrow?: ReactNode }) {
   return (
-    <div className="border-b bg-card">
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 sm:px-6 md:flex-row md:items-end md:justify-between">
-        <div className="max-w-3xl">
-          {eyebrow && <div className="mb-2">{eyebrow}</div>}
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
-          {description && <p className="mt-2 text-muted-foreground">{description}</p>}
+    <div className="border-b border-border/70 bg-card">
+      <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-7 sm:px-6 sm:py-9 md:flex-row md:items-end md:justify-between">
+        <div className="max-w-3xl border-l-[3px] border-primary pl-4 sm:pl-5">
+          {eyebrow && <div className="mb-3">{eyebrow}</div>}
+          <h1 className="text-2xl font-bold leading-tight text-foreground sm:text-3xl">{title}</h1>
+          {description && <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">{description}</p>}
         </div>
-        {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+        {actions && <div className="flex flex-wrap items-center gap-2 md:justify-end">{actions}</div>}
       </div>
     </div>
   );
@@ -117,9 +117,11 @@ export function EmptyState({ title, children }: { title?: string; children?: Rea
 export function ErrorState({ onRetry, message }: { onRetry?: () => void; message?: string }) {
   const { t } = useI18n();
   return (
-    <div role="alert" className="flex flex-col items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center">
-      <AlertTriangle className="size-6 text-destructive" />
-      <p className="text-sm">{message ?? t("common.error")}</p>
+    <div role="alert" className="flex flex-col items-center gap-3 rounded-lg border border-destructive/25 bg-destructive/[0.06] p-6 text-center shadow-sm">
+      <span className="flex size-10 items-center justify-center rounded-full bg-destructive/10">
+        <AlertTriangle className="size-5 text-destructive" />
+      </span>
+      <p className="max-w-prose text-sm font-medium leading-6">{message ?? t("common.error")}</p>
       {onRetry && (
         <Button variant="outline" size="sm" onClick={onRetry}>
           <RefreshCw /> {t("common.retry")}
@@ -171,10 +173,10 @@ export function OfflineBar() {
 
 export function Section({ title, description, action, children, className }: { title: ReactNode; description?: string; action?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section className={cn("card-surface p-5", className)}>
-      <div className="mb-4 flex items-center justify-between gap-2">
-        <div><h2 className="font-semibold">{title}</h2>{description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}</div>
-        {action}
+    <section className={cn("card-surface min-w-0 p-4 sm:p-5", className)}>
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0"><h2 className="font-semibold leading-6 text-foreground">{title}</h2>{description && <p className="mt-1 max-w-3xl text-sm leading-5 text-muted-foreground">{description}</p>}</div>
+        {action && <div className="flex shrink-0 flex-wrap items-center gap-2">{action}</div>}
       </div>
       {children}
     </section>
@@ -189,9 +191,9 @@ export function Notice({ tone = "info", icon, children }: { tone?: "info" | "dan
         ? "border-warning/40 bg-warning/10 text-foreground"
         : "border-teal/30 bg-accent text-accent-foreground";
   return (
-    <div className={cn("flex gap-3 rounded-xl border p-4 text-sm", cls)}>
+    <div className={cn("flex gap-3 rounded-lg border p-4 text-sm leading-6 shadow-sm", cls)}>
       {icon && <span className="mt-0.5 shrink-0">{icon}</span>}
-      <div>{children}</div>
+      <div className="min-w-0">{children}</div>
     </div>
   );
 }

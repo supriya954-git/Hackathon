@@ -37,7 +37,7 @@ export function useMarkers() {
         district: r.district,
         municipality: r.municipality,
         description: r.description,
-        source: r.source === "official" ? "Official (demo)" : "Community report",
+        source: r.source === "official" ? "Official report" : "Community report",
         status: r.status,
         reportedAt: r.createdAt,
         verifiedAt: r.status === "verified" ? r.updatedAt : undefined,
@@ -93,5 +93,13 @@ export function useMarkers() {
     facilities.refetch();
     rescues.refetch();
   };
-  return { items, isLoading, isError, refetch, privileged };
+  return {
+    items,
+    isLoading,
+    isError,
+    hazardsLoading: reports.isLoading,
+    hazardsError: reports.isError,
+    refetch,
+    privileged,
+  };
 }

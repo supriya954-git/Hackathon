@@ -77,13 +77,17 @@ The web/mobile layer currently:
 - caches successful API GET responses in local storage;
 - preserves the last successful synchronization timestamp;
 - serves cached lists when a later request fails;
+- checks cached verified, non-demo hazard reports locally for foreground proximity warnings;
+- requests Android coarse/fine location permission through the Capacitor WebView when the user enables proximity alerts;
 - saves offline emergency requests, including photo evidence as a local data
   URL;
 - labels queued requests as not yet delivered to rescue teams.
 
 Cached data is not a live alert channel. It can be stale, expired, withdrawn, or
 unavailable. Newly issued server alerts cannot arrive without a communication
-channel.
+channel. Proximity monitoring and its sound warning are foreground-only; there
+is no background location permission, native geofence, or tested alert delivery
+when the app is closed or the device is locked.
 
 ## Current validation and remaining blockers
 
@@ -151,7 +155,9 @@ install the APK with:
 adb install -r .\android\app\build\outputs\apk\debug\app-debug.apk
 ```
 
-Native geofencing, WorkManager synchronization, notification channels, and
-Android permission handling remain intentionally pending until the Android
-project can be compiled and tested on an emulator or device. Frontend static
-packaging alone does not provide those native guarantees.
+Native geofencing, WorkManager synchronization, and notification channels
+remain intentionally pending until the Android project can be compiled and
+tested on an emulator or device. The foreground WebView location permission is
+declared, but the Android APK and its runtime permission flow have not been
+tested on an emulator or device. Frontend static packaging does not provide
+background alert guarantees.
